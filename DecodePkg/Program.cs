@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace DecodePkg
 {
     internal class Program
     {
+
         static string[] export_types = new[]
         {
             ".lua",
@@ -27,12 +29,17 @@ namespace DecodePkg
 
             while (!File.Exists(filePath))
             {
+                Console.WriteLine("拖入pkg文件到该控制台");
+
                 filePath = Console.ReadLine();
             }
 
+            // 有时候路径有空格，导致读不到路径
+            filePath = filePath.Trim('"');
+
             var outdir = Path.Combine(Path.GetTempPath(), "qqsg_objects");
 
-            Console.WriteLine("output dir is ");
+            Console.WriteLine("输出目录为 {0}", outdir);
 
 
             _ = Task.Run(() => WriteToDiskAsync(filePath, outdir));
@@ -55,7 +62,7 @@ namespace DecodePkg
             var resource = 0;
             var txt = 0;
             var other = 0;
-            var formattedString = "资源文件(gsn|gso|gsa|ef3):{0}  txt文件：{1}  其他 {2}";
+            var formattedString = "输出目录为: " + outdir + " 资源文件(gsn|gso|gsa|ef3):{0}  txt文件：{1}  其他 {2}";
 
             content = string.Format(formattedString, resource, txt, other);
 
@@ -77,6 +84,8 @@ namespace DecodePkg
 
             for (var index = 0; index < filenums; index++)
             {
+                var decrypt = false;
+
                 var name_len = ReadShort(reader);
 
                 var name = ReadString(reader, name_len);
@@ -110,6 +119,7 @@ namespace DecodePkg
                 else if (extension == ".txt")
                 {
                     txt++;
+                    decrypt = true;
                     content = string.Format(formattedString, resource, txt, other);
                 }
 
@@ -119,7 +129,7 @@ namespace DecodePkg
                     content = string.Format(formattedString, resource, txt, other);
                 }
 
-                if(export_types.Contains(extension))
+                if (export_types.Contains(extension))
                 {
                     var outfilename = Path.Join(outdir, Path.GetFileName(fileName), name);
 
@@ -128,9 +138,10 @@ namespace DecodePkg
                         Directory.CreateDirectory(Path.GetDirectoryName(outfilename));
                     }
 
-                    using var file = File.Open(outfilename, FileMode.OpenOrCreate);
+                    using var file = File.Open(outfilename, FileMode.Truncate);
 
-                    file.Write(Decompress(text));
+                    // 密钥:
+                    file.Write(Decrypter.Decrypt(Decompress(text), Encoding.ASCII.GetBytes("pleasebecareful0")));
 
                     file.Flush();
                 }

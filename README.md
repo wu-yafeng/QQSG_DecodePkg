@@ -8,6 +8,10 @@ QQ三国拆包工具源码
 
 运行 `DecodePkg.exe` 文件，拖动QQ三国目录下的 `data\\objects.pkg` 文件到控制台，文件将解压到 `%TMEP%/qqsg_objects` 目录下.
 
-## 有关搜索
+# 如果无法运行
 
-Searching.exe 是没什么卵用的，windows 自带搜索的命令，比如使用 `findstr "通络丹" *.lua` 来搜索lua脚本里的“通络丹”字符串
+请下载 [.NET 6运行时](https://dotnet.microsoft.com/zh-cn/download/dotnet/thank-you/runtime-6.0.16-windows-x64-installer)
+
+# 更新日志
+
+2023/04/20 增加了解密，现在回馈的积分奖励和一些加密的内容也能被拆出来了。优化了console的交互方式

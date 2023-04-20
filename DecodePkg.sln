@@ -5,8 +5,6 @@ VisualStudioVersion = 17.2.32210.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DecodePkg", "DecodePkg\DecodePkg.csproj", "{532D37FB-998E-45F2-A8ED-797786E2E2D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seaching", "Seaching\Seaching.csproj", "{30F0C8BF-E650-4686-AE7F-8EC6471715FC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{532D37FB-998E-45F2-A8ED-797786E2E2D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{532D37FB-998E-45F2-A8ED-797786E2E2D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{532D37FB-998E-45F2-A8ED-797786E2E2D7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{30F0C8BF-E650-4686-AE7F-8EC6471715FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{30F0C8BF-E650-4686-AE7F-8EC6471715FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{30F0C8BF-E650-4686-AE7F-8EC6471715FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{30F0C8BF-E650-4686-AE7F-8EC6471715FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
