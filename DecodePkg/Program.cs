@@ -23,6 +23,7 @@ namespace DecodePkg
 
         static bool ok;
 
+        static string error = "";
         static void Main(string[] args)
         {
             string filePath = string.Empty;
@@ -42,7 +43,14 @@ namespace DecodePkg
             Console.WriteLine("输出目录为 {0}", outdir);
 
 
-            _ = Task.Run(() => WriteToDiskAsync(filePath, outdir));
+            _ = Task.Run(() => WriteToDiskAsync(filePath, outdir)).ContinueWith(x=>{
+                if(x.Exception != null)
+                {
+                    ok = true;
+
+                    error = x.Exception.ToString();
+                }
+            });
 
             while (!ok)
             {
@@ -53,6 +61,8 @@ namespace DecodePkg
             }
 
             Console.WriteLine("执行完成");
+
+            Console.WriteLine(error);
 
             Console.ReadKey();
         }
@@ -138,7 +148,7 @@ namespace DecodePkg
                         Directory.CreateDirectory(Path.GetDirectoryName(outfilename));
                     }
 
-                    using var file = File.Open(outfilename, FileMode.Truncate);
+                    using var file = File.Create(outfilename);
 
                     // 密钥:
                     file.Write(Decrypter.Decrypt(Decompress(text), Encoding.ASCII.GetBytes("pleasebecareful0")));
