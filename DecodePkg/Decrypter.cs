@@ -54,6 +54,8 @@ namespace DecodePkg
 
         public static byte[] Decrypt(byte[] buffer, byte[] key)
         {
+            var remain_j = 0;
+
             // 头4个字节是标志是否是加密的txt
             if (buffer.Length > 4 && buffer[0] == 63 && buffer[1] == 83 && buffer[2] == 63 && buffer[3] == 71)
             {
@@ -75,7 +77,7 @@ namespace DecodePkg
 
                     var block = DecryptBlock(decrypt_block, key);
 
-                    var j = 0;
+                    var j = remain_j;
 
                     // first block
                     if (i == 0)
@@ -85,11 +87,22 @@ namespace DecodePkg
                         //result = new List<byte>(body.Length - header_offset - 10);
 
                         j = header_offset + 3;
-                    }
 
+                        
+                    }
                     for (; j < 8; j++)
                     {
                         result.Add((byte)(block[j] ^ prev_original_block[j]));
+                    }
+
+                    // next block
+                    if (j > 8)
+                    {
+                        remain_j = j % 8;
+                    }
+                    else
+                    {
+                        remain_j = 0;
                     }
 
                     prev_block = block;
