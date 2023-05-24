@@ -105,6 +105,15 @@ namespace DecodePkg
                 prev_original_block = body[i..(i + 8)];
             }
 
+            // 删除最后几个null字节
+            for (var i = result.Count - 1; i != 0; i--)
+            {
+                if (result[i] == 0)
+                {
+                    result.RemoveAt(i);
+                }
+            }
+
             return result.ToArray();
         }
     }

@@ -74,9 +74,14 @@ namespace DecodePkg
             var txt = 0;
             var other = 0;
             var formattedString = "输出目录为: " + outdir + " 资源文件(gsn|gso|gsa|ef3):{0}  txt文件：{1}  其他 {2}";
+            var decrypt = true;
 
             content = string.Format(formattedString, resource, txt, other);
 
+            if (Path.GetFileName(fileName) == "objects.pkg")
+            {
+                decrypt = false;
+            }
 
             var reader = File.OpenRead(fileName);
 
@@ -95,7 +100,6 @@ namespace DecodePkg
 
             for (var index = 0; index < filenums; index++)
             {
-                var decrypt = false;
 
                 var name_len = ReadShort(reader);
 
@@ -130,7 +134,6 @@ namespace DecodePkg
                 else if (extension == ".txt")
                 {
                     txt++;
-                    decrypt = true;
                     content = string.Format(formattedString, resource, txt, other);
                 }
 
@@ -145,6 +148,8 @@ namespace DecodePkg
 
                     var privateKey = string.Empty;
 
+                    text = Decompress(text);
+
                     if (extension == ".txt" && text.Length > 4 && text[0] == 63 && text[1] == 83 && text[2] == 63 && text[3] == 71)
                     {
                         privateKey = "pleasebecareful0";
@@ -153,7 +158,7 @@ namespace DecodePkg
                         text = text[4..];
                     }
 
-                    if (extension == ".lua")
+                    if (extension == ".lua" && decrypt)
                     {
                         privateKey = "leaf12345678yech";
                     }
@@ -168,7 +173,7 @@ namespace DecodePkg
                     using var file = File.Create(outfilename);
 
                     // 密钥:
-                    file.Write(string.IsNullOrEmpty(privateKey) ? Decompress(text) : Decrypter.Decrypt(Decompress(text), Encoding.ASCII.GetBytes(privateKey)));
+                    file.Write(string.IsNullOrEmpty(privateKey) ? text : Decrypter.Decrypt(text, Encoding.ASCII.GetBytes(privateKey)));
 
                     file.Flush();
                 }
