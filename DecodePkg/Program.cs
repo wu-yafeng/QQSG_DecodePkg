@@ -158,7 +158,7 @@ namespace DecodePkg
                         text = text[4..];
                     }
 
-                    if (extension == ".lua" && decrypt)
+                    if (extension == ".lua" && text.TakeLast(4).SequenceEqual("QQSG".Select(x => (byte)x)))
                     {
                         privateKey = "leaf12345678yech";
                     }
