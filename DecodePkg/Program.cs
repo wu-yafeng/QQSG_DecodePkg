@@ -26,7 +26,7 @@ namespace DecodePkg
         static string error = "";
         static void Main(string[] args)
         {
-            string filePath = string.Empty;
+            string filePath = "C:\\Program Files\\腾讯游戏\\QQ三国\\data\\update.pkg";// string.Empty;
 
             while (!File.Exists(filePath))
             {
@@ -43,8 +43,9 @@ namespace DecodePkg
             Console.WriteLine("输出目录为 {0}", outdir);
 
 
-            _ = Task.Run(() => WriteToDiskAsync(filePath, outdir)).ContinueWith(x=>{
-                if(x.Exception != null)
+            _ = Task.Run(() => WriteToDiskAsync(filePath, outdir)).ContinueWith(x =>
+            {
+                if (x.Exception != null)
                 {
                     ok = true;
 
@@ -141,6 +142,22 @@ namespace DecodePkg
 
                 if (export_types.Contains(extension))
                 {
+
+                    var privateKey = string.Empty;
+
+                    if (extension == ".txt" && text.Length > 4 && text[0] == 63 && text[1] == 83 && text[2] == 63 && text[3] == 71)
+                    {
+                        privateKey = "pleasebecareful0";
+
+                        // 头4个字节是标志是否是加密的txt
+                        text = text[4..];
+                    }
+
+                    if (extension == ".lua")
+                    {
+                        privateKey = "leaf12345678yech";
+                    }
+
                     var outfilename = Path.Join(outdir, Path.GetFileName(fileName), name);
 
                     if (!Directory.Exists(Path.GetDirectoryName(outfilename)))
@@ -151,7 +168,7 @@ namespace DecodePkg
                     using var file = File.Create(outfilename);
 
                     // 密钥:
-                    file.Write(Decrypter.Decrypt(Decompress(text), Encoding.ASCII.GetBytes("pleasebecareful0")));
+                    file.Write(string.IsNullOrEmpty(privateKey) ? Decompress(text) : Decrypter.Decrypt(Decompress(text), Encoding.ASCII.GetBytes(privateKey)));
 
                     file.Flush();
                 }

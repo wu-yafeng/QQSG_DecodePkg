@@ -52,67 +52,60 @@ namespace DecodePkg
         }
 
 
-        public static byte[] Decrypt(byte[] buffer, byte[] key)
+        public static byte[] Decrypt(byte[] body, byte[] key)
         {
             var remain_j = 0;
 
-            // 头4个字节是标志是否是加密的txt
-            if (buffer.Length > 4 && buffer[0] == 63 && buffer[1] == 83 && buffer[2] == 63 && buffer[3] == 71)
+
+            var prev_block = new byte[8];
+            var prev_original_block = new byte[8];
+
+            var result = new List<byte>();
+
+            // 最后的8个字节不知道是干嘛的，应该是签名校验的东西
+            for (var i = 0; i < body.Length - 8; i += 8)
             {
-                var body = buffer[4..];
-
-                var prev_block = new byte[8];
-                var prev_original_block = new byte[8];
-
-                var result = new List<byte>();
-
-                // 最后的8个字节不知道是干嘛的，应该是签名校验的东西
-                for (var i = 0; i < body.Length - 8; i += 8)
+                var decrypt_block = new byte[8];
+                for (var k = 0; k < 8; k++)
                 {
-                    var decrypt_block = new byte[8];
-                    for (var k = 0; k < 8; k++)
-                    {
-                        decrypt_block[k] = (byte)(prev_block[k] ^ body[i + k]);
-                    }
-
-                    var block = DecryptBlock(decrypt_block, key);
-
-                    var j = remain_j;
-
-                    // first block
-                    if (i == 0)
-                    {
-                        var header_offset = block[0] & 7;
-
-                        //result = new List<byte>(body.Length - header_offset - 10);
-
-                        j = header_offset + 3;
-
-                        
-                    }
-                    for (; j < 8; j++)
-                    {
-                        result.Add((byte)(block[j] ^ prev_original_block[j]));
-                    }
-
-                    // next block
-                    if (j > 8)
-                    {
-                        remain_j = j % 8;
-                    }
-                    else
-                    {
-                        remain_j = 0;
-                    }
-
-                    prev_block = block;
-                    prev_original_block = body[i..(i + 8)];
+                    decrypt_block[k] = (byte)(prev_block[k] ^ body[i + k]);
                 }
 
-                return result.ToArray();
+                var block = DecryptBlock(decrypt_block, key);
+
+                var j = remain_j;
+
+                // first block
+                if (i == 0)
+                {
+                    var header_offset = block[0] & 7;
+
+                    //result = new List<byte>(body.Length - header_offset - 10);
+
+                    j = header_offset + 3;
+
+
+                }
+                for (; j < 8; j++)
+                {
+                    result.Add((byte)(block[j] ^ prev_original_block[j]));
+                }
+
+                // next block
+                if (j > 8)
+                {
+                    remain_j = j % 8;
+                }
+                else
+                {
+                    remain_j = 0;
+                }
+
+                prev_block = block;
+                prev_original_block = body[i..(i + 8)];
             }
 
-            return buffer;
+            return result.ToArray();
         }
     }
 }
