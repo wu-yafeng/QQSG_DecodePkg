@@ -1,9 +1,12 @@
 ﻿using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using Microsoft.Win32;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,7 +29,33 @@ namespace DecodePkg
         static string error = "";
         static void Main(string[] args)
         {
-            string filePath = "C:\\Program Files\\腾讯游戏\\QQ三国\\data\\update.pkg";// string.Empty;
+
+            string filePath = string.Empty;
+
+            // for linux or mac os platform, we need interact with user for pkg file path.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Tencent\QQSG\SYS");
+
+                if (key != null && key.GetValue("pathRoot") != null)
+                {
+                    filePath = key.GetValue("pathRoot").ToString() + @"\data\update.pkg";
+                }
+
+                Console.WriteLine("使用文件 {0} --- 按回城确认  CTRL+A 取消", filePath);
+
+                var readkey = Console.ReadKey();
+
+                if (readkey.Modifiers.HasFlag(ConsoleModifiers.Control) && readkey.Key == ConsoleKey.A)
+                {
+                    filePath = string.Empty;
+                }
+            }
+            else
+            {
+                filePath = string.Empty;
+            }
+
 
             while (!File.Exists(filePath))
             {
@@ -65,8 +94,15 @@ namespace DecodePkg
 
             Console.WriteLine(error);
 
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Process.Start("explorer.exe", outdir);
+            }
+
             Console.ReadKey();
         }
+
+
 
         private static void WriteToDiskAsync(string fileName, string outdir)
         {
